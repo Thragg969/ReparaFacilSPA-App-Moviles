@@ -1,0 +1,7 @@
+<resources>
+    <style name="Theme.ReparaFacilSPA" parent="Theme.Material3.DayNight.NoActionBar">
+        <!-- Opcional -->
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+    </style>
+</resources>

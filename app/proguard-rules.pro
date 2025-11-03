@@ -1,0 +1,2 @@
+-keep class androidx.compose.** { *; }
+-keep class com.squareup.moshi.** { *; }
