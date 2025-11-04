@@ -1,18 +1,11 @@
-package com.example.reparafacilspa.data.repository
+package com.example.reparafacilspa.feature.auth
 
-import com.example.reparafacilspa.core.local.SessionManager
+import com.example.reparafacilspa.core.network.ApiService
+import com.example.reparafacilspa.core.network.LoginRequest
 
 class AuthRepository(
-    private val session: SessionManager
+    private val api: ApiService
 ) {
-    // Stub de login: valida algo simple y guarda un token.
-    suspend fun login(email: String, password: String): Result<Unit> = try {
-        if (email.isBlank() || password.isBlank()) {
-            throw IllegalArgumentException("Email/Password vacíos")
-        }
-        session.setToken("FAKE_TOKEN_${email}")
-        Result.success(Unit)
-    } catch (e: Exception) {
-        Result.failure(e)
-    }
+    suspend fun login(email: String, pass: String) = api.login(LoginRequest(email, pass))
+    suspend fun me(token: String) = api.me("Bearer $token")
 }
