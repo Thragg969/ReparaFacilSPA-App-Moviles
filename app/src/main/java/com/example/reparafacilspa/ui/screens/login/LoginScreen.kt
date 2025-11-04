@@ -1,3 +1,5 @@
+@file:OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
+
 package com.example.reparafacilspa.ui.screens.login
 
 import androidx.compose.foundation.layout.*
@@ -21,13 +23,10 @@ fun LoginScreen(
     var pass by rememberSaveable { mutableStateOf("") }
     var showPass by rememberSaveable { mutableStateOf(false) }
 
-    // estado para error y loading
     var error by remember { mutableStateOf<String?>(null) }
     var loading by remember { mutableStateOf(false) }
 
-    // para correr la llamada a la API
     val scope = rememberCoroutineScope()
-    // repo que habla con la API del profe
     val repo = remember { AuthRepository() }
 
     Scaffold(
@@ -51,7 +50,6 @@ fun LoginScreen(
                 .padding(20.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-
             OutlinedTextField(
                 value = email,
                 onValueChange = {
@@ -102,15 +100,9 @@ fun LoginScreen(
 
                     scope.launch {
                         try {
-                            // llamada real a la API
-                            val token = repo.login(email.trim(), pass)
-
-                            // si quieres aquí podrías hacer repo.me(token)
-
-                            // seguimos el flujo de tu app
+                            repo.login(email.trim(), pass)
                             onLogin(email.trim(), pass)
                         } catch (e: Exception) {
-                            // si la API no responde o credenciales malas
                             error = e.message ?: "Error al conectar con la API"
                         } finally {
                             loading = false
@@ -132,4 +124,3 @@ fun LoginScreen(
         }
     }
 }
-

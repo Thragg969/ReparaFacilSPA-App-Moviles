@@ -1,5 +1,10 @@
+@file:OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
+
 package com.example.reparafacilspa.ui.screens.perfil
 
+import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -11,21 +16,17 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import coil.compose.rememberAsyncImagePainter
 
 @Composable
 fun PerfilScreen(
     onBack: () -> Unit
 ) {
-    // guardamos la uri de la imagen
     var avatarUri by rememberSaveable { mutableStateOf<String?>(null) }
 
-    // launcher para elegir foto de galería
     val pickImage = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
-    ) { uri ->
+    ) { uri: Uri? ->
         avatarUri = uri?.toString()
     }
 
@@ -49,7 +50,6 @@ fun PerfilScreen(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-
             Box(
                 modifier = Modifier
                     .size(120.dp)
@@ -70,11 +70,6 @@ fun PerfilScreen(
 
             Text("Usuario ReparaFácil")
             Text("usuario@reparafacil.cl", style = MaterialTheme.typography.bodyMedium)
-
-            Text(
-                "Aquí podrías mostrar los datos de /auth/me cuando conectes la API.",
-                style = MaterialTheme.typography.bodySmall
-            )
         }
     }
 }

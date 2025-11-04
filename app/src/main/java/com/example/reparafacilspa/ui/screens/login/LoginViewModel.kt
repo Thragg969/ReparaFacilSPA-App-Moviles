@@ -2,30 +2,31 @@ package com.example.reparafacilspa.ui.screens.login
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.reparafacilspa.feature.auth.AuthRepository
+import com.example.reparafacilspa.core.auth.AuthRepository
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
 class LoginViewModel : ViewModel() {
 
-    private val repo = AuthRepository(RetrofitClient.api)
+    private val repo = AuthRepository()
 
     private val _uiState = MutableStateFlow(LoginUiState())
-    val uiState = _uiState.asStateFlow()
+    val uiState: StateFlow<LoginUiState> = _uiState
 
-    fun doLogin(email: String, pass: String, onToken: (String) -> Unit) {
+    fun login(email: String, pass: String) {
         viewModelScope.launch {
-            _uiState.value = LoginUiState(isLoading = true)
+            // estado: cargando
+            _uiState.value = LoginUiState(loading = true)
             try {
-                val res = repo.login(email, pass)
-                // guardamos token hacia fuera
-                onToken(res.token)
-                // opcional: llamamos /auth/me para mostrar el user
-                val me = repo.me(res.token)
-                _uiState.value = LoginUiState(isSuccess = true)
+                val token = repo.login(email, pass)
+                // estado: éxito
+                _uiState.value = LoginUiState(token = token)
             } catch (e: Exception) {
-                _uiState.value = LoginUiState(error = e.message ?: "Error al iniciar sesión")
+                // estado: error
+                _uiState.value = LoginUiState(
+                    error = e.message ?: "Error al conectar con la API"
+                )
             }
         }
     }
