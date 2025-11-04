@@ -17,38 +17,20 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
-    buildTypes {
-        debug { isMinifyEnabled = false }
-        release {
-            isMinifyEnabled = false
-            proguardFiles(
-                getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
-            )
-        }
-    }
-
-    // usamos compose
     buildFeatures {
         compose = true
     }
 
-    // Java / Kotlin
+    composeOptions {
+        kotlinCompilerExtensionVersion = "1.5.4"
+    }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
     kotlinOptions {
         jvmTarget = "17"
-        freeCompilerArgs += listOf(
-            "-opt-in=androidx.compose.material3.ExperimentalMaterial3Api",
-            "-opt-in=androidx.compose.material.ExperimentalMaterialApi"
-        )
-    }
-
-    // esto está bien que lo tengas
-    kotlin {
-        jvmToolchain(17)
     }
 
     packaging {
@@ -57,44 +39,44 @@ android {
 }
 
 dependencies {
-    // ---- Compose / UI ----
-    implementation(platform("androidx.compose:compose-bom:2024.10.01"))
-    implementation("androidx.activity:activity-compose:1.9.3")
-    implementation("androidx.compose.ui:ui")
-    implementation("androidx.compose.ui:ui-tooling-preview")
-    implementation("androidx.compose.material3:material3")
-    implementation("androidx.navigation:navigation-compose:2.8.3")
-    implementation("androidx.compose.material:material-icons-core")
-    implementation("androidx.compose.material:material-icons-extended")
-    debugImplementation("androidx.compose.ui:ui-tooling")
-    debugImplementation("androidx.compose.ui:ui-test-manifest")
+    dependencies {
+        // Compose
+        implementation(platform("androidx.compose:compose-bom:2024.10.01"))
+        implementation("androidx.activity:activity-compose:1.9.3")
+        implementation("androidx.compose.ui:ui")
+        implementation("androidx.compose.ui:ui-tooling-preview")
+        implementation("androidx.compose.material3:material3:1.3.0")
+        implementation("androidx.navigation:navigation-compose:2.8.3")
 
-    // ---- Material “normal” por si usas XML o temas heredados ----
-    implementation("com.google.android.material:material:1.12.0")
-    implementation("androidx.appcompat:appcompat:1.7.0")
+        // Material XML (para el theme)
+        implementation("com.google.android.material:material:1.12.0")
+        implementation("androidx.appcompat:appcompat:1.7.0")
+        implementation("androidx.core:core-ktx:1.13.1")
 
-    // ---- Corrutinas / Data / Imágenes ----
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.9.0")
-    implementation("androidx.datastore:datastore-preferences:1.1.1")
-    implementation("io.coil-kt:coil-compose:2.7.0")
+        // DataStore (persistencia simple)
+        implementation("androidx.datastore:datastore-preferences:1.1.1")
 
-    // ---- Networking ----
-    implementation("com.squareup.okhttp3:okhttp:4.12.0")
-    implementation("com.squareup.okhttp3:logging-interceptor:4.12.0")
-    implementation("com.squareup.retrofit2:retrofit:2.11.0")
-    implementation("com.squareup.retrofit2:converter-gson:2.11.0")
+        // Retrofit
+        implementation("com.squareup.okhttp3:okhttp:4.12.0")
+        implementation("com.squareup.okhttp3:logging-interceptor:4.12.0")
+        implementation("com.squareup.retrofit2:retrofit:2.11.0")
+        implementation("com.squareup.retrofit2:converter-gson:2.11.0")
 
-    // ---- Servicios de Google / permisos ----
-    implementation("com.google.android.gms:play-services-location:21.3.0")
-    implementation("androidx.core:core-ktx:1.13.1")
-    implementation("androidx.activity:activity-ktx:1.9.3")
-    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.8.4")
+        // Coil (avatar)
+        implementation("io.coil-kt:coil-compose:2.7.0")
 
-    // ---- Tests ----
-    testImplementation("junit:junit:4.13.2")
-    androidTestImplementation("androidx.test.ext:junit:1.2.1")
-    androidTestImplementation("androidx.test.espresso:espresso-core:3.6.1")
-    androidTestImplementation(platform("androidx.compose:compose-bom:2024.10.01"))
-    androidTestImplementation("androidx.compose.ui:ui-test-junit4")
+        // Coroutines
+        implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.9.0")
+        // para usar await() en ubicación
+        implementation("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.9.0")
+
+        // Google Location
+        implementation("com.google.android.gms:play-services-location:21.3.0")
+
+        testImplementation("junit:junit:4.13.2")
+        androidTestImplementation("androidx.test.ext:junit:1.2.1")
+        androidTestImplementation("androidx.test.espresso:espresso-core:3.6.1")
+    }
+
 }
 

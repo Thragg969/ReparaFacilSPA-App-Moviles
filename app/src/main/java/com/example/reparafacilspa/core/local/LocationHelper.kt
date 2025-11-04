@@ -1,26 +1,16 @@
 package com.example.reparafacilspa.core.local
 
+import android.annotation.SuppressLint
 import android.content.Context
 import com.google.android.gms.location.LocationServices
+import kotlinx.coroutines.tasks.await
 
-object LocationHelper {
-    /**
-     * Obtiene una ubicación rápida (última conocida). Si no hay permisos o falla, devuelve nulls.
-     */
-    fun requestSingleUpdate(
-        context: Context,
-        onResult: (lat: Double?, lng: Double?) -> Unit
-    ) {
+class LocationHelper(private val context: Context) {
+
+    @SuppressLint("MissingPermission")
+    suspend fun getLastLocation(): Pair<Double, Double>? {
         val client = LocationServices.getFusedLocationProviderClient(context)
-        try {
-            client.lastLocation
-                .addOnSuccessListener { loc ->
-                    if (loc != null) onResult(loc.latitude, loc.longitude)
-                    else onResult(null, null)
-                }
-                .addOnFailureListener { onResult(null, null) }
-        } catch (_: SecurityException) {
-            onResult(null, null)
-        }
+        val loc = client.lastLocation.await() ?: return null
+        return loc.latitude to loc.longitude
     }
 }
