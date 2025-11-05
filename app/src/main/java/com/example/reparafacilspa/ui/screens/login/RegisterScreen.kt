@@ -2,29 +2,31 @@
 
 package com.example.reparafacilspa.ui.screens.login
 
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import com.example.reparafacilspa.core.auth.AuthRepository
 import com.example.reparafacilspa.viewmodel.AuthSharedViewModel
 import kotlinx.coroutines.launch
 
 @Composable
-fun LoginScreen(
-    onLogin: (email: String, pass: String) -> Unit,
-    onBack: (() -> Unit)? = null,
-    onRegister: () -> Unit,
+fun RegisterScreen(
+    onRegistered: () -> Unit,
+    onBack: () -> Unit,
     authVm: AuthSharedViewModel
 ) {
+    var name by rememberSaveable { mutableStateOf("") }
     var email by rememberSaveable { mutableStateOf("") }
     var pass by rememberSaveable { mutableStateOf("") }
-    var showPass by rememberSaveable { mutableStateOf(false) }
 
     var error by remember { mutableStateOf<String?>(null) }
     var loading by remember { mutableStateOf(false) }
@@ -35,52 +37,44 @@ fun LoginScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Ingresar") },
+                title = { Text("Crear cuenta") },
                 navigationIcon = {
-                    if (onBack != null) {
-                        IconButton(onClick = onBack) {
-                            Text("<")
-                        }
+                    IconButton(onClick = onBack) {
+                        Text("<")
                     }
                 }
             )
         }
     ) { pad ->
         Column(
-            modifier = Modifier
+            Modifier
                 .fillMaxSize()
                 .padding(pad)
                 .padding(20.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-
+            OutlinedTextField(
+                value = name,
+                onValueChange = { name = it; error = null },
+                label = { Text("Nombre") },
+                modifier = Modifier.fillMaxWidth()
+            )
             OutlinedTextField(
                 value = email,
                 onValueChange = { email = it; error = null },
                 label = { Text("Email") },
-                singleLine = true,
                 modifier = Modifier.fillMaxWidth()
             )
-
             OutlinedTextField(
                 value = pass,
                 onValueChange = { pass = it; error = null },
                 label = { Text("Password") },
-                singleLine = true,
-                visualTransformation = if (showPass) VisualTransformation.None else PasswordVisualTransformation(),
                 modifier = Modifier.fillMaxWidth()
             )
 
-            TextButton(
-                onClick = { showPass = !showPass },
-                modifier = Modifier.align(Alignment.End)
-            ) {
-                Text(if (showPass) "Ocultar" else "Mostrar")
-            }
-
             if (error != null) {
                 Text(
-                    text = error!!,
+                    error!!,
                     color = MaterialTheme.colorScheme.error,
                     style = MaterialTheme.typography.bodySmall
                 )
@@ -88,25 +82,25 @@ fun LoginScreen(
 
             Button(
                 onClick = {
-                    if (email.isBlank() || pass.isBlank()) {
-                        error = "Completa los campos"
+                    if (name.isBlank() || email.isBlank() || pass.isBlank()) {
+                        error = "Completa todo"
                         return@Button
                     }
                     loading = true
                     scope.launch {
                         try {
-                            repo.login(email.trim(), pass)
-                            // guardamos al menos el correo
-                            authVm.setUser(name = null, email = email.trim())
-                            onLogin(email.trim(), pass)
+                            repo.signup(name, email, pass)
+                            // guardamos los datos del usuario registrado
+                            authVm.setUser(name, email)
+                            onRegistered()
                         } catch (e: Exception) {
-                            error = e.message ?: "Error al conectar con la API"
+                            error = e.message ?: "No se pudo registrar"
                         } finally {
                             loading = false
                         }
                     }
                 },
-                enabled = email.isNotBlank() && pass.isNotBlank() && !loading,
+                enabled = !loading,
                 modifier = Modifier.align(Alignment.End)
             ) {
                 if (loading) {
@@ -115,12 +109,8 @@ fun LoginScreen(
                         strokeWidth = 2.dp
                     )
                 } else {
-                    Text("Ingresar")
+                    Text("Registrarme")
                 }
-            }
-
-            TextButton(onClick = onRegister) {
-                Text("¿No tienes cuenta? Crear una")
             }
         }
     }

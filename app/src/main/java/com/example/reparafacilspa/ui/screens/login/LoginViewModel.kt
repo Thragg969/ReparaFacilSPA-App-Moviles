@@ -16,16 +16,13 @@ class LoginViewModel : ViewModel() {
 
     fun login(email: String, pass: String) {
         viewModelScope.launch {
-            // estado: cargando
             _uiState.value = LoginUiState(loading = true)
             try {
                 val token = repo.login(email, pass)
-                // estado: éxito
                 _uiState.value = LoginUiState(token = token)
             } catch (e: Exception) {
-                // estado: error
                 _uiState.value = LoginUiState(
-                    error = e.message ?: "Error al conectar con la API"
+                    error = e.message ?: "Error al conectar"
                 )
             }
         }
