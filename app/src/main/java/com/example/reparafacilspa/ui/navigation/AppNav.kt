@@ -11,12 +11,17 @@ import com.example.reparafacilspa.ui.screens.perfil.PerfilScreen
 import com.example.reparafacilspa.ui.screens.servicio.ServicioCreateScreen
 import com.example.reparafacilspa.ui.screens.servicio.ServiciosScreen
 import com.example.reparafacilspa.viewmodel.AuthSharedViewModel
+import com.example.reparafacilspa.viewmodel.ServiciosViewModel
 
 @Composable
 fun AppNav() {
     val nav = rememberNavController()
-    // VM compartido SOLO para auth/perfil
+
+    // VM compartido de auth
     val authVm: AuthSharedViewModel = viewModel()
+
+    // VM compartido de servicios
+    val serviciosVm: ServiciosViewModel = viewModel()
 
     NavHost(navController = nav, startDestination = "login") {
 
@@ -35,10 +40,7 @@ fun AppNav() {
 
         composable("register") {
             RegisterScreen(
-                onRegistered = {
-                    // volvemos al login después de crear la cuenta
-                    nav.popBackStack()
-                },
+                onRegistered = { nav.popBackStack() },
                 onBack = { nav.popBackStack() },
                 authVm = authVm
             )
@@ -46,6 +48,7 @@ fun AppNav() {
 
         composable("servicios") {
             ServiciosScreen(
+                viewModel = serviciosVm,
                 onAdd = { nav.navigate("servicios/create") },
                 onPerfil = { nav.navigate("perfil") }
             )
@@ -53,6 +56,7 @@ fun AppNav() {
 
         composable("servicios/create") {
             ServicioCreateScreen(
+                viewModel = serviciosVm,
                 onDone = { nav.popBackStack() }
             )
         }
@@ -60,6 +64,11 @@ fun AppNav() {
         composable("perfil") {
             PerfilScreen(
                 onBack = { nav.popBackStack() },
+                onLogout = {
+                    nav.navigate("login") {
+                        popUpTo("servicios") { inclusive = true }
+                    }
+                },
                 authVm = authVm
             )
         }

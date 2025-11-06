@@ -1,36 +1,41 @@
 package com.example.reparafacilspa.viewmodel
 
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.launch
 
 data class ServicioUi(
-    val id: Long,
+    val id: Int,
     val titulo: String,
     val descripcion: String
 )
 
 class ServiciosViewModel : ViewModel() {
 
-    private val _servicios = MutableStateFlow<List<ServicioUi>>(emptyList())
-    val servicios: StateFlow<List<ServicioUi>> = _servicios
+    // lista visible para la pantalla
+    private val _servicios = mutableStateListOf<ServicioUi>()
+    val servicios: List<ServicioUi> get() = _servicios
 
-    fun agregar(titulo: String, descripcion: String) {
-        viewModelScope.launch {
-            val nuevo = ServicioUi(
-                id = System.currentTimeMillis(),
+    // mensaje para mostrar en snackbar cuando se crea algo
+    var lastMessage by mutableStateOf<String?>(null)
+        private set
+
+    private var nextId = 1
+
+    fun addServicio(titulo: String, descripcion: String) {
+        _servicios.add(
+            ServicioUi(
+                id = nextId++,
                 titulo = titulo,
                 descripcion = descripcion
             )
-            _servicios.value = _servicios.value + nuevo
-        }
+        )
+        lastMessage = "Servicio creado exitosamente"
     }
 
-    fun eliminar(id: Long) {
-        viewModelScope.launch {
-            _servicios.value = _servicios.value.filterNot { it.id == id }
-        }
+    fun clearMessage() {
+        lastMessage = null
     }
 }

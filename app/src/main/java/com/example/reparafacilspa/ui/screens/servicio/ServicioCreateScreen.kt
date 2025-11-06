@@ -5,53 +5,62 @@ package com.example.reparafacilspa.ui.screens.servicio
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.reparafacilspa.viewmodel.ServiciosViewModel
 
 @Composable
 fun ServicioCreateScreen(
-    onDone: () -> Unit,
-    vm: ServiciosViewModel = viewModel()
+    viewModel: ServiciosViewModel,
+    onDone: () -> Unit
 ) {
-    var titulo by rememberSaveable { mutableStateOf("") }
-    var descripcion by rememberSaveable { mutableStateOf("") }
+    var titulo by remember { mutableStateOf("") }
+    var descripcion by remember { mutableStateOf("") }
+    var error by remember { mutableStateOf<String?>(null) }
 
     Scaffold(
         topBar = {
-            TopAppBar(title = { Text("Nuevo servicio") })
+            TopAppBar(
+                title = { Text("Nuevo servicio") }
+            )
         }
     ) { pad ->
         Column(
-            Modifier
+            modifier = Modifier
                 .fillMaxSize()
                 .padding(pad)
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
+                .padding(20.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             OutlinedTextField(
                 value = titulo,
-                onValueChange = { titulo = it },
+                onValueChange = { titulo = it; error = null },
                 label = { Text("Título") },
-                modifier = Modifier.fillMaxWidth(),
-                isError = titulo.isBlank()
+                modifier = Modifier.fillMaxWidth()
             )
+
             OutlinedTextField(
                 value = descripcion,
-                onValueChange = { descripcion = it },
+                onValueChange = { descripcion = it; error = null },
                 label = { Text("Descripción") },
-                modifier = Modifier.fillMaxWidth(),
-                minLines = 3
+                modifier = Modifier.fillMaxWidth()
             )
+
+            if (error != null) {
+                Text(error!!, color = MaterialTheme.colorScheme.error)
+            }
+
             Button(
                 onClick = {
-                    vm.agregar(titulo, descripcion)
+                    if (titulo.isBlank() || descripcion.isBlank()) {
+                        error = "Completa todos los campos"
+                        return@Button
+                    }
+
+                    viewModel.addServicio(titulo.trim(), descripcion.trim())
                     onDone()
                 },
-                enabled = titulo.isNotBlank(),
                 modifier = Modifier.align(Alignment.End)
             ) {
                 Text("Guardar")

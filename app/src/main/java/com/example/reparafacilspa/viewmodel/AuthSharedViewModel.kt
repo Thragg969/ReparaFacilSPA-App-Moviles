@@ -1,10 +1,11 @@
 package com.example.reparafacilspa.viewmodel
 
 import android.graphics.Bitmap
-import androidx.compose.ui.graphics.ImageBitmap
-import androidx.compose.ui.graphics.asImageBitmap
 import androidx.lifecycle.ViewModel
 
+/**
+ * ViewModel simple para compartir datos del usuario entre pantallas.
+ */
 class AuthSharedViewModel : ViewModel() {
 
     var name: String? = null
@@ -13,12 +14,12 @@ class AuthSharedViewModel : ViewModel() {
     var email: String? = null
         private set
 
-    // para galería (uri en string)
+    // si eligió una foto de la galería
     var avatarUri: String? = null
         private set
 
-    // para cámara (bitmap)
-    var avatarBitmap: ImageBitmap? = null
+    // si sacó una foto con la cámara
+    var avatarBitmap: Bitmap? = null
         private set
 
     fun setUser(name: String?, email: String?) {
@@ -28,11 +29,18 @@ class AuthSharedViewModel : ViewModel() {
 
     fun setAvatarUri(uri: String?) {
         avatarUri = uri
-        avatarBitmap = null   // si escogió galería, limpiamos cámara
+        avatarBitmap = null
     }
 
     fun setAvatarBitmap(bitmap: Bitmap?) {
-        avatarBitmap = bitmap?.asImageBitmap()
-        avatarUri = null      // si escogió cámara, limpiamos galería
+        avatarBitmap = bitmap
+        avatarUri = null
+    }
+
+    fun logout() {
+        name = null
+        email = null
+        avatarUri = null
+        avatarBitmap = null
     }
 }

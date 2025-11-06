@@ -23,20 +23,37 @@ import com.example.reparafacilspa.viewmodel.AuthSharedViewModel
 @Composable
 fun PerfilScreen(
     onBack: () -> Unit,
+    onLogout: () -> Unit,
     authVm: AuthSharedViewModel
 ) {
     var showPicker by remember { mutableStateOf(false) }
+    var camaraDenegada by remember { mutableStateOf(false) }
 
+    // galería
     val pickImage = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
     ) { uri: Uri? ->
         authVm.setAvatarUri(uri?.toString())
     }
 
+    // cámara (preview)
     val takePhoto = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.TakePicturePreview()
     ) { bmp: Bitmap? ->
-        authVm.setAvatarBitmap(bmp)
+        if (bmp != null) {
+            authVm.setAvatarBitmap(bmp)
+        }
+    }
+
+    // pedir permiso de cámara
+    val requestCameraPermission = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission()
+    ) { granted ->
+        if (granted) {
+            takePhoto.launch(null)
+        } else {
+            camaraDenegada = true
+        }
     }
 
     Scaffold(
@@ -59,6 +76,8 @@ fun PerfilScreen(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
+
+            // avatar
             Box(
                 modifier = Modifier
                     .size(120.dp)
@@ -69,7 +88,7 @@ fun PerfilScreen(
                 when {
                     authVm.avatarBitmap != null -> {
                         Image(
-                            bitmap = authVm.avatarBitmap!!,
+                            bitmap = authVm.avatarBitmap!!.asImageBitmap(),
                             contentDescription = "Avatar",
                             modifier = Modifier.fillMaxSize()
                         )
@@ -89,6 +108,33 @@ fun PerfilScreen(
 
             Text(authVm.name ?: "Usuario ReparaFácil")
             Text(authVm.email ?: "usuario@reparafacil.cl", style = MaterialTheme.typography.bodyMedium)
+
+            if (camaraDenegada) {
+                Text(
+                    "Permiso de cámara denegado",
+                    color = MaterialTheme.colorScheme.error,
+                    style = MaterialTheme.typography.bodySmall
+                )
+            }
+
+            Spacer(modifier = Modifier.height(30.dp))
+
+            // botón cerrar sesión
+            Button(
+                onClick = {
+                    authVm.logout()
+                    onLogout()
+                },
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.errorContainer
+                ),
+                modifier = Modifier.fillMaxWidth(0.7f)
+            ) {
+                Text(
+                    "Cerrar sesión",
+                    color = MaterialTheme.colorScheme.onErrorContainer
+                )
+            }
         }
     }
 
@@ -100,7 +146,7 @@ fun PerfilScreen(
             confirmButton = {
                 TextButton(onClick = {
                     showPicker = false
-                    takePhoto.launch(null)
+                    requestCameraPermission.launch(android.Manifest.permission.CAMERA)
                 }) {
                     Text("Cámara")
                 }

@@ -1,29 +1,32 @@
 @file:OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
-
 package com.example.reparafacilspa.ui.screens.servicio
 
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.reparafacilspa.viewmodel.ServiciosViewModel
 
 @Composable
 fun ServiciosScreen(
+    viewModel: ServiciosViewModel,
     onAdd: () -> Unit,
-    onPerfil: () -> Unit,
-    vm: ServiciosViewModel = viewModel()
+    onPerfil: () -> Unit
 ) {
-    val servicios by vm.servicios.collectAsState()
+    val snackbarHostState = remember { SnackbarHostState() }
+
+    LaunchedEffect(viewModel.lastMessage) {
+        val msg = viewModel.lastMessage
+        if (msg != null) {
+            snackbarHostState.showSnackbar(msg)
+            viewModel.clearMessage()
+        }
+    }
 
     Scaffold(
         topBar = {
@@ -40,34 +43,34 @@ fun ServiciosScreen(
             FloatingActionButton(onClick = onAdd) {
                 Text("+")
             }
-        }
+        },
+        snackbarHost = { SnackbarHost(snackbarHostState) }
     ) { pad ->
         Column(
-            Modifier
+            modifier = Modifier
                 .fillMaxSize()
                 .padding(pad)
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            if (servicios.isEmpty()) {
-                Text(
-                    "No hay servicios aún",
-                    modifier = Modifier.padding(16.dp)
-                )
+            if (viewModel.servicios.isEmpty()) {
+                Text("No hay servicios aún")
             } else {
-                LazyColumn {
-                    items(servicios) { s ->
-                        ListItem(
-                            headlineContent = { Text(s.titulo) },
-                            supportingContent = { Text(s.descripcion) },
-                            trailingContent = {
-                                IconButton(onClick = { vm.eliminar(s.id) }) {
-                                    Icon(
-                                        imageVector = Icons.Default.Delete,
-                                        contentDescription = "Eliminar"
-                                    )
-                                }
-                            }
-                        )
-                        Divider()
+                viewModel.servicios.forEach { srv ->
+                    Surface(
+                        tonalElevation = 2.dp,
+                        shadowElevation = 1.dp,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(12.dp)
+                        ) {
+                            Text(srv.titulo, style = MaterialTheme.typography.titleMedium)
+                            Spacer(Modifier.height(4.dp))
+                            Text(srv.descripcion, style = MaterialTheme.typography.bodySmall)
+                        }
                     }
                 }
             }
