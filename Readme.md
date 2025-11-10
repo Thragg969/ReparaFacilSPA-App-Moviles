@@ -102,7 +102,7 @@ Los estados (como cargando o con error) se muestran al usuario conforme cambian.
 
 ## 5. Endpoints utilizados
 
-# Base URL: https://x8ki-letl-twmt.n7.xano.io/api:Rfm_61dW
+**Base URL: https://x8ki-letl-twmt.n7.xano.io/api:Rfm_61dW**
 
 | Método | Ruta | Descripción | Respuesta esperada |
 | ------ | ---- | ------------ | ------------------ |
@@ -112,7 +112,7 @@ Los estados (como cargando o con error) se muestran al usuario conforme cambian.
 
 ## 6. Flujos de usuario
 
-**Registro**
+**Registro:**
 
 El usuario abre la app y elige "Crear cuenta", llena sus datos y validan antes de enviarlos.
 Si todo esta correcto, se registra y se guarda su sesion, lo manda directamente a a la pantalla principal.
