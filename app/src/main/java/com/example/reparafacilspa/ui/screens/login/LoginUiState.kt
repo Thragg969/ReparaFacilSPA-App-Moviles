@@ -1,7 +1,6 @@
 package com.example.reparafacilspa.ui.screens.login
 
-data class LoginUiState(
+data class LoginUIState(
     val loading: Boolean = false,
-    val error: String? = null,
-    val token: String? = null
+    val errorMessage: String? = null
 )

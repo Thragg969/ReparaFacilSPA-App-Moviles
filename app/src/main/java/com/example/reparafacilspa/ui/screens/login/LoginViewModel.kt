@@ -2,27 +2,32 @@ package com.example.reparafacilspa.ui.screens.login
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.reparafacilspa.core.auth.AuthRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
 class LoginViewModel : ViewModel() {
 
-    private val repo = AuthRepository()
-
-    private val _uiState = MutableStateFlow(LoginUiState())
-    val uiState: StateFlow<LoginUiState> = _uiState
+    private val _uiState = MutableStateFlow(LoginUIState())
+    val uiState: StateFlow<LoginUIState> = _uiState
 
     fun login(email: String, pass: String) {
         viewModelScope.launch {
-            _uiState.value = LoginUiState(loading = true)
+            _uiState.value = LoginUIState(loading = true)
+
             try {
-                val token = repo.login(email, pass)
-                _uiState.value = LoginUiState(token = token)
+                if (email == "test@test.com" && pass == "1234") {
+                    _uiState.value = LoginUIState(loading = false)
+                } else {
+                    _uiState.value = LoginUIState(
+                        loading = false,
+                        errorMessage = "Credenciales incorrectas"
+                    )
+                }
             } catch (e: Exception) {
-                _uiState.value = LoginUiState(
-                    error = e.message ?: "Error al conectar"
+                _uiState.value = LoginUIState(
+                    loading = false,
+                    errorMessage = e.message ?: "Error inesperado"
                 )
             }
         }
