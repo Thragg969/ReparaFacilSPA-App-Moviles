@@ -18,17 +18,16 @@ data class TecnicoUi(
 class TecnicoViewModel : ViewModel() {
 
     private val _tecnicos = mutableStateListOf(
-        TecnicoUi(1, "Carlos Muñoz", "Refrigeración", 4.8f, "+56 9 8765 4321", true),
-        TecnicoUi(2, "María González", "Electricidad", 4.9f, "+56 9 7654 3210", true),
-        TecnicoUi(3, "Pedro Sánchez", "Plomería", 4.5f, "+56 9 6543 2109", true),
-        TecnicoUi(4, "Ana Torres", "Electrodomésticos", 4.7f, "+56 9 5432 1098", false),
-        TecnicoUi(5, "Jorge Ramírez", "Gasfitería", 4.6f, "+56 9 4321 0987", true)
+        TecnicoUi(1, "Carlos Munoz", "Refrigeracion", 4.8f, "+56 9 8765 4321", true),
+        TecnicoUi(2, "Maria Gonzalez", "Electricidad", 4.9f, "+56 9 7654 3210", true),
+        TecnicoUi(3, "Pedro Sanchez", "Plomeria", 4.5f, "+56 9 6543 2109", true),
+        TecnicoUi(4, "Ana Torres", "Electrodomesticos", 4.7f, "+56 9 5432 1098", false),
+        TecnicoUi(5, "Jorge Ramirez", "Gasfiteria", 4.6f, "+56 9 4321 0987", true)
     )
 
     val tecnicos: List<TecnicoUi> get() = _tecnicos
 
-    var lastMessage by mutableStateOf<String?>(null)
-        private set
+    var lastMessage: String? = null
 
     fun getTecnico(id: Int): TecnicoUi? {
         return _tecnicos.find { it.id == id }
