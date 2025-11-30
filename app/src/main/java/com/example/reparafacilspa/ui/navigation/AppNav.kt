@@ -7,7 +7,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 
 import com.example.reparafacilspa.ui.screens.agenda.AgendaScreen
-import com.example.reparafacilspa.ui.screens.agenda.GarantiaScreen
+import com.example.reparafacilspa.ui.screens.home.HomeScreen
 import com.example.reparafacilspa.ui.screens.login.LoginScreen
 import com.example.reparafacilspa.ui.screens.login.RegisterScreen
 import com.example.reparafacilspa.ui.screens.perfil.PerfilScreen
@@ -16,16 +16,15 @@ import com.example.reparafacilspa.ui.screens.servicio.ServiciosScreen
 
 import com.example.reparafacilspa.viewmodel.AgendaViewModel
 import com.example.reparafacilspa.viewmodel.AuthSharedViewModel
-import com.example.reparafacilspa.viewmodel.GarantiaViewModel
 import com.example.reparafacilspa.viewmodel.ServiciosViewModel
 
 @Composable
 fun AppNavigation(nav: NavHostController) {
 
+    // ---------- ViewModels Compartidos ----------
     val authVm: AuthSharedViewModel = viewModel()
     val serviciosVm: ServiciosViewModel = viewModel()
     val agendaVm: AgendaViewModel = viewModel()
-    val garantiaVm: GarantiaViewModel = viewModel()
 
     NavHost(
         navController = nav,
@@ -36,7 +35,7 @@ fun AppNavigation(nav: NavHostController) {
         composable("login") {
             LoginScreen(
                 onLogin = { _, _ ->
-                    nav.navigate("servicios") {
+                    nav.navigate("home") {
                         popUpTo("login") { inclusive = true }
                     }
                 },
@@ -55,7 +54,17 @@ fun AppNavigation(nav: NavHostController) {
             )
         }
 
-        // ---------- SERVICIOS (Home) ----------
+        // ---------- HOME (Nuevo Dashboard 2.0) ----------
+        composable("home") {
+            HomeScreen(
+                onGoServicios = { nav.navigate("servicios") },
+                onGoPerfil = { nav.navigate("perfil") },
+                serviciosVm = serviciosVm,
+                agendaVm = agendaVm
+            )
+        }
+
+        // ---------- SERVICIOS ----------
         composable("servicios") {
             ServiciosScreen(
                 viewModel = serviciosVm,
@@ -68,16 +77,14 @@ fun AppNavigation(nav: NavHostController) {
         composable("servicio_create") {
             ServicioCreateScreen(
                 viewModel = serviciosVm,
-                onDone = {
-                    nav.popBackStack()
-                }
+                onDone = { nav.popBackStack() }
             )
         }
 
         // ---------- PERFIL ----------
         composable("perfil") {
             PerfilScreen(
-                onBack = { nav.popBackStack() },
+                onBack = { nav.navigate("home") },
                 onLogout = {
                     authVm.logout()
                     nav.navigate("login") {
@@ -91,11 +98,6 @@ fun AppNavigation(nav: NavHostController) {
         // ---------- AGENDA ----------
         composable("agenda") {
             AgendaScreen(vm = agendaVm)
-        }
-
-        // ---------- GARANTÍAS ----------
-        composable("garantias") {
-            GarantiaScreen(vm = garantiaVm)
         }
     }
 }

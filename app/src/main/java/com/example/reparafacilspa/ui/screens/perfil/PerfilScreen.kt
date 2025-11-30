@@ -6,8 +6,9 @@ import android.graphics.Bitmap
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.animation.*
-import androidx.compose.animation.core.*
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.slideInVertically
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -19,8 +20,29 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.ExitToApp
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
-import androidx.compose.material.icons.filled.*
-import androidx.compose.material3.*
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Build
+import androidx.compose.material.icons.filled.Face
+import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.Warning
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -73,7 +95,7 @@ fun PerfilScreen(
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(
-                            Icons.AutoMirrored.Filled.ArrowBack,   // <-- FIX
+                            Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = "Volver"
                         )
                     }
@@ -99,7 +121,10 @@ fun PerfilScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(16.dp),
-                    shape = RoundedCornerShape(20.dp)
+                    shape = RoundedCornerShape(20.dp),
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.surface
+                    )
                 ) {
 
                     Column(
@@ -202,7 +227,7 @@ fun PerfilScreen(
                         icon = Icons.Default.Build,
                         title = "Mis Servicios",
                         subtitle = "Ver historial de reparaciones",
-                        onClick = {}
+                        onClick = { }
                     )
 
                     ProfileOptionCard(
@@ -235,7 +260,7 @@ fun PerfilScreen(
                 )
             ) {
                 Icon(
-                    Icons.AutoMirrored.Filled.ExitToApp,   // <-- FIX
+                    Icons.AutoMirrored.Filled.ExitToApp,
                     contentDescription = "logout",
                     tint = MaterialTheme.colorScheme.error
                 )
