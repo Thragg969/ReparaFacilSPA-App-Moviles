@@ -1,75 +1,72 @@
 package com.example.reparafacilspa.ui.screens.agenda
 
+import androidx.compose.animation.*
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
 import com.example.reparafacilspa.viewmodel.AgendaViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AgendaScreen(vm: AgendaViewModel) {
+fun AgendaScreen(nav: NavController, vm: AgendaViewModel) {
 
-    val eventos by vm.agenda.collectAsState()
-    val clima by vm.weatherState.collectAsState()
+    val eventos by remember { derivedStateOf { vm.eventos } }
 
     Scaffold(
         topBar = {
-            TopAppBar(title = { Text("Agenda") })
+            TopAppBar(
+                title = { Text("Agenda") }
+            )
+        },
+        floatingActionButton = {
+            FloatingActionButton(onClick = { nav.navigate("agendar") }) {
+                Icon(Icons.Default.Add, contentDescription = null)
+            }
         }
     ) { pad ->
 
         Column(
-            Modifier
+            modifier = Modifier
                 .padding(pad)
                 .padding(16.dp)
-                .fillMaxSize()
         ) {
 
-            // ---------- CLIMA ----------
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                elevation = CardDefaults.cardElevation(4.dp)
-            ) {
-                Column(Modifier.padding(16.dp)) {
-
-                    if (clima.loading) {
-                        CircularProgressIndicator()
-                    } else if (clima.error != null) {
-                        Text("Error al cargar clima: ${clima.error}")
-                    } else {
-                        Text("Ciudad: ${clima.ciudad}", style = MaterialTheme.typography.titleMedium)
-                        Text("Temperatura: ${clima.temperatura}")
-                        Text("Descripción: ${clima.descripcion}")
-                    }
-                }
+            if (eventos.isEmpty()) {
+                Text("No hay eventos aún.")
+                return@Column
             }
 
-            Spacer(Modifier.height(20.dp))
+            LazyColumn(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                items(eventos) { ev ->
+                    Card(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { nav.navigate("agenda_detail/${ev.id}") },
+                        elevation = CardDefaults.cardElevation(4.dp)
+                    ) {
+                        Column(Modifier.padding(16.dp)) {
 
-            // ---------- AGENDA ----------
-            if (eventos.isEmpty()) {
-                Text("No hay eventos agendados.")
-            } else {
-                LazyColumn {
-                    items(eventos) { e ->
-                        Card(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(bottom = 12.dp),
-                            elevation = CardDefaults.cardElevation(4.dp)
-                        ) {
-                            Column(Modifier.padding(16.dp)) {
-                                Text("Servicio: ${e.servicioId}", style = MaterialTheme.typography.titleMedium)
-                                Spacer(Modifier.height(6.dp))
-                                Text("Inicio: ${e.inicio}")
-                                Text("Fin: ${e.fin}")
-                                Spacer(Modifier.height(6.dp))
-                                Text("Dirección: ${e.direccion}")
+                            Row(
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+                                Text(ev.titulo, style = MaterialTheme.typography.titleMedium)
+                                Icon(Icons.Default.KeyboardArrowRight, null)
                             }
+
+                            Spacer(Modifier.height(6.dp))
+
+                            Text("📅 ${ev.fecha}")
+                            Text("Estado: ${ev.estado}")
                         }
                     }
                 }

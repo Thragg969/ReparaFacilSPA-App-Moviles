@@ -3,10 +3,15 @@ package com.example.reparafacilspa.ui.navigation
 import androidx.compose.runtime.Composable
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.navArgument
 
 import com.example.reparafacilspa.ui.screens.agenda.AgendaScreen
+import com.example.reparafacilspa.ui.screens.agenda.AgendarEventoScreen
+import com.example.reparafacilspa.ui.screens.agenda.AgendaDetailScreen
+import com.example.reparafacilspa.ui.screens.agenda.ReagendarDialog
 import com.example.reparafacilspa.ui.screens.home.HomeScreen
 import com.example.reparafacilspa.ui.screens.login.LoginScreen
 import com.example.reparafacilspa.ui.screens.login.RegisterScreen
@@ -21,7 +26,6 @@ import com.example.reparafacilspa.viewmodel.ServiciosViewModel
 @Composable
 fun AppNavigation(nav: NavHostController) {
 
-    // ---------- ViewModels Compartidos ----------
     val authVm: AuthSharedViewModel = viewModel()
     val serviciosVm: ServiciosViewModel = viewModel()
     val agendaVm: AgendaViewModel = viewModel()
@@ -31,7 +35,6 @@ fun AppNavigation(nav: NavHostController) {
         startDestination = "login"
     ) {
 
-        // ---------- LOGIN ----------
         composable("login") {
             LoginScreen(
                 onLogin = { _, _ ->
@@ -45,7 +48,6 @@ fun AppNavigation(nav: NavHostController) {
             )
         }
 
-        // ---------- REGISTER ----------
         composable("register") {
             RegisterScreen(
                 onRegistered = { nav.popBackStack() },
@@ -54,7 +56,6 @@ fun AppNavigation(nav: NavHostController) {
             )
         }
 
-        // ---------- HOME (Nuevo Dashboard 2.0) ----------
         composable("home") {
             HomeScreen(
                 onGoServicios = { nav.navigate("servicios") },
@@ -64,7 +65,6 @@ fun AppNavigation(nav: NavHostController) {
             )
         }
 
-        // ---------- SERVICIOS ----------
         composable("servicios") {
             ServiciosScreen(
                 viewModel = serviciosVm,
@@ -73,7 +73,6 @@ fun AppNavigation(nav: NavHostController) {
             )
         }
 
-        // ---------- CREAR SERVICIO ----------
         composable("servicio_create") {
             ServicioCreateScreen(
                 viewModel = serviciosVm,
@@ -81,7 +80,6 @@ fun AppNavigation(nav: NavHostController) {
             )
         }
 
-        // ---------- PERFIL ----------
         composable("perfil") {
             PerfilScreen(
                 onBack = { nav.navigate("home") },
@@ -95,9 +93,39 @@ fun AppNavigation(nav: NavHostController) {
             )
         }
 
-        // ---------- AGENDA ----------
         composable("agenda") {
-            AgendaScreen(vm = agendaVm)
+            AgendaScreen(
+                nav = nav,
+                vm = agendaVm
+            )
+        }
+
+        composable("agendar") {
+            AgendarEventoScreen(
+                nav = nav,
+                vm = agendaVm
+            )
+        }
+        composable(
+            route = "agenda_detail/{id}",
+            arguments = listOf(navArgument("id") { type = NavType.IntType })
+        ) { backStackEntry ->
+            val id = backStackEntry.arguments?.getInt("id") ?: 0
+            AgendaDetailScreen(nav, agendaVm, id)
+        }
+
+        composable(
+            route = "reagendar/{id}",
+            arguments = listOf(navArgument("id") { type = NavType.IntType })
+        ) { backStackEntry ->
+            val id = backStackEntry.arguments?.getInt("id") ?: 0
+            ReagendarDialog(
+                onDismiss = { nav.popBackStack() },
+                onConfirm = { fecha ->
+                    agendaVm.reagendarEvento(id, fecha)
+                    nav.popBackStack()
+                }
+            )
         }
     }
 }
