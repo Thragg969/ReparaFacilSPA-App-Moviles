@@ -1,4 +1,4 @@
-package com.example.reparafacilspa.ui.screens.agenda
+package com.example.reparafacilspa.ui.screens.reparacion
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -7,7 +7,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.DateRange
-import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -15,19 +15,19 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import com.example.reparafacilspa.viewmodel.GarantiaViewModel
-import com.example.reparafacilspa.viewmodel.GarantiaUi
+import com.example.reparafacilspa.viewmodel.ReparacionViewModel
+import com.example.reparafacilspa.viewmodel.ReparacionUi
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun GarantiaScreen(
+fun MisReparacionesScreen(
     nav: NavController,
-    viewModel: GarantiaViewModel
+    viewModel: ReparacionViewModel
 ) {
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Mis Garantías") },
+                title = { Text("Mis Reparaciones") },
                 navigationIcon = {
                     IconButton(onClick = { nav.popBackStack() }) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, "Volver")
@@ -47,11 +47,11 @@ fun GarantiaScreen(
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            items(viewModel.garantias) { garantia ->
-                GarantiaCard(garantia = garantia)
+            items(viewModel.reparaciones) { reparacion ->
+                ReparacionCard(reparacion = reparacion)
             }
 
-            if (viewModel.garantias.isEmpty()) {
+            if (viewModel.reparaciones.isEmpty()) {
                 item {
                     Box(
                         modifier = Modifier
@@ -60,7 +60,7 @@ fun GarantiaScreen(
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
-                            text = "No tienes garantías registradas",
+                            text = "No tienes reparaciones registradas",
                             style = MaterialTheme.typography.bodyLarge,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -72,15 +72,15 @@ fun GarantiaScreen(
 }
 
 @Composable
-fun GarantiaCard(garantia: GarantiaUi) {
+fun ReparacionCard(reparacion: ReparacionUi) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
         colors = CardDefaults.cardColors(
-            containerColor = if (garantia.estado == "Vigente") {
-                MaterialTheme.colorScheme.tertiaryContainer
-            } else {
-                MaterialTheme.colorScheme.surfaceVariant
+            containerColor = when (reparacion.estado) {
+                "Completada" -> MaterialTheme.colorScheme.tertiaryContainer
+                "En proceso" -> MaterialTheme.colorScheme.secondaryContainer
+                else -> MaterialTheme.colorScheme.surface
             }
         )
     ) {
@@ -93,39 +93,38 @@ fun GarantiaCard(garantia: GarantiaUi) {
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = garantia.descripcion,
+                    text = reparacion.descripcion,
                     style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier.weight(1f)
+                    fontWeight = FontWeight.Bold
                 )
 
-                if (garantia.estado == "Vigente") {
+                if (reparacion.estado == "Completada") {
                     Icon(
                         Icons.Default.CheckCircle,
-                        contentDescription = "Vigente",
+                        contentDescription = "Completada",
                         tint = MaterialTheme.colorScheme.tertiary,
                         modifier = Modifier.size(24.dp)
                     )
                 }
             }
 
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(8.dp))
 
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Icon(
-                    Icons.Default.Info,
+                    Icons.Default.Person,
                     contentDescription = null,
                     tint = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.size(18.dp)
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
-                    text = "Cobertura: ${garantia.cobertura}",
+                    text = "Técnico: ${reparacion.tecnicoNombre}",
                     style = MaterialTheme.typography.bodyMedium
                 )
             }
 
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(4.dp))
 
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Icon(
@@ -135,41 +134,32 @@ fun GarantiaCard(garantia: GarantiaUi) {
                     modifier = Modifier.size(18.dp)
                 )
                 Spacer(modifier = Modifier.width(8.dp))
-                Column {
-                    Text(
-                        text = "Inicio: ${garantia.fechaInicio}",
-                        style = MaterialTheme.typography.bodySmall
-                    )
-                    Text(
-                        text = "Vencimiento: ${garantia.fechaVencimiento}",
-                        style = MaterialTheme.typography.bodySmall,
-                        fontWeight = FontWeight.Bold
-                    )
-                }
+                Text(
+                    text = "Fecha: ${reparacion.fecha}",
+                    style = MaterialTheme.typography.bodyMedium
+                )
             }
 
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(8.dp))
 
-            Surface(
+            Row(
                 modifier = Modifier.fillMaxWidth(),
-                color = if (garantia.estado == "Vigente") {
-                    MaterialTheme.colorScheme.tertiary
-                } else {
-                    MaterialTheme.colorScheme.surfaceVariant
-                },
-                shape = MaterialTheme.shapes.small
+                horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Text(
-                    text = garantia.estado.uppercase(),
-                    style = MaterialTheme.typography.labelMedium,
-                    fontWeight = FontWeight.Bold,
-                    color = if (garantia.estado == "Vigente") {
-                        MaterialTheme.colorScheme.onTertiary
-                    } else {
-                        MaterialTheme.colorScheme.onSurfaceVariant
-                    },
-                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
+                    text = "Estado: ${reparacion.estado}",
+                    style = MaterialTheme.typography.bodySmall,
+                    fontWeight = FontWeight.Medium
                 )
+
+                if (reparacion.costo > 0) {
+                    Text(
+                        text = "$$${reparacion.costo}",
+                        style = MaterialTheme.typography.bodySmall,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                }
             }
         }
     }

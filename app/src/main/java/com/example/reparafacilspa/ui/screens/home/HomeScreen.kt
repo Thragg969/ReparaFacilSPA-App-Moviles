@@ -1,202 +1,208 @@
-@file:OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
-
 package com.example.reparafacilspa.ui.screens.home
 
-import androidx.compose.animation.*
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Build
-import androidx.compose.material.icons.filled.Warning
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.reparafacilspa.viewmodel.ServiciosViewModel
+import androidx.navigation.NavController
+import com.example.reparafacilspa.viewmodel.AuthSharedViewModel
 import com.example.reparafacilspa.viewmodel.AgendaViewModel
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
-    onGoServicios: () -> Unit,
-    onGoPerfil: () -> Unit,
-    serviciosVm: ServiciosViewModel = viewModel(),
-    agendaVm: AgendaViewModel = viewModel()
+    nav: NavController,
+    authVm: AuthSharedViewModel,
+    agendaVm: AgendaViewModel
 ) {
-    var visible by remember { mutableStateOf(false) }
-    LaunchedEffect(Unit) { visible = true }
-
-    val servicios = serviciosVm.servicios
     val weatherState by agendaVm.weatherState.collectAsState()
 
     LaunchedEffect(Unit) {
-        agendaVm.loadWeatherForCity("Santiago,CL")
+        agendaVm.loadWeatherForCity("Santiago")
     }
 
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("ReparaFácil") },
+                title = { Text("ReparaFácil SPA") },
                 actions = {
-                    IconButton(onClick = onGoPerfil) {
-                        Icon(Icons.Default.Build, contentDescription = "Perfil")
+                    IconButton(onClick = { nav.navigate("perfil") }) {
+                        Icon(Icons.Default.Person, contentDescription = "Perfil")
                     }
-                }
+                    IconButton(onClick = {
+                        authVm.logout()
+                        nav.navigate("login") {
+                            popUpTo("home") { inclusive = true }
+                        }
+                    }) {
+                        Icon(Icons.Default.ExitToApp, contentDescription = "Salir")
+                    }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.primaryContainer,
+                    titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                )
             )
         }
-    ) { pad ->
+    ) { padding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(pad)
-                .padding(16.dp)
+                .padding(padding)
+                .verticalScroll(rememberScrollState())
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
+            // Bienvenida
+            Text(
+                text = "¡Bienvenido!",
+                style = MaterialTheme.typography.headlineMedium,
+                fontWeight = FontWeight.Bold
+            )
 
-            AnimatedVisibility(
-                visible = visible,
-                enter = fadeIn() + slideInVertically(initialOffsetY = { -40 })
+            // Widget del clima
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.secondaryContainer
+                )
             ) {
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(20.dp),
-                    colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.primaryContainer
-                    )
+                Column(
+                    modifier = Modifier.padding(16.dp)
                 ) {
                     Row(
-                        modifier = Modifier.padding(20.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(16.dp)
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Text(
-                            text = "☀️",
-                            style = MaterialTheme.typography.displayMedium
-                        )
-
-                        when {
-                            weatherState.loading -> {
-                                Column {
-                                    Text(
-                                        text = "Cargando...",
-                                        style = MaterialTheme.typography.headlineSmall
-                                    )
-                                    Text(
-                                        text = "Obteniendo clima",
-                                        style = MaterialTheme.typography.bodyMedium
-                                    )
-                                }
-                            }
-                            weatherState.error != null -> {
-                                Column {
-                                    Text(
-                                        text = "--°C",
-                                        style = MaterialTheme.typography.headlineSmall
-                                    )
-                                    Text(
-                                        text = "No disponible",
-                                        style = MaterialTheme.typography.bodyMedium
-                                    )
-                                }
-                            }
-                            else -> {
-                                Column {
-                                    Text(
-                                        text = weatherState.temperatura,
-                                        style = MaterialTheme.typography.headlineSmall,
-                                        color = MaterialTheme.colorScheme.onPrimaryContainer
-                                    )
-                                    Text(
-                                        text = weatherState.descripcion,
-                                        style = MaterialTheme.typography.bodyMedium,
-                                        color = MaterialTheme.colorScheme.onPrimaryContainer
-                                    )
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-
-            Spacer(Modifier.height(16.dp))
-
-            AnimatedVisibility(
-                visible = visible,
-                enter = fadeIn(animationSpec = tween(700, delayMillis = 150))
-            ) {
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(16.dp),
-                    colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.errorContainer
-                    )
-                ) {
-                    Row(
-                        modifier = Modifier.padding(16.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(12.dp)
-                    ) {
-                        Icon(
-                            Icons.Default.Warning,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.error
-                        )
-                        Text(
-                            text = "Atención: Puede haber retrasos por el clima.",
-                            color = MaterialTheme.colorScheme.onErrorContainer,
-                            style = MaterialTheme.typography.bodyMedium
-                        )
-                    }
-                }
-            }
-
-            Spacer(Modifier.height(16.dp))
-
-            AnimatedVisibility(
-                visible = visible,
-                enter = fadeIn(animationSpec = tween(700, delayMillis = 300))
-            ) {
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(16.dp)
-                ) {
-                    Column(
-                        modifier = Modifier.padding(20.dp),
-                        verticalArrangement = Arrangement.spacedBy(12.dp)
-                    ) {
-                        Text(
-                            "Servicios activos",
-                            style = MaterialTheme.typography.titleLarge.copy(
-                                fontWeight = FontWeight.SemiBold
-                            )
-                        )
-
-                        if (servicios.isEmpty()) {
+                        Column {
                             Text(
-                                "No tienes servicios por ahora",
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                                text = weatherState.ciudad.ifEmpty { "Santiago" },
+                                style = MaterialTheme.typography.titleLarge,
+                                fontWeight = FontWeight.Bold
                             )
-                        } else {
-                            servicios.take(3).forEach {
-                                Text("- ${it.titulo}")
+                            if (weatherState.loading) {
+                                CircularProgressIndicator(modifier = Modifier.size(20.dp))
+                            } else if (weatherState.error != null) {
+                                Text(
+                                    text = weatherState.error ?: "",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.error
+                                )
+                            } else {
+                                Text(
+                                    text = weatherState.descripcion,
+                                    style = MaterialTheme.typography.bodyMedium
+                                )
                             }
+                        }
+                        if (!weatherState.loading && weatherState.error == null) {
+                            Text(
+                                text = weatherState.temperatura,
+                                style = MaterialTheme.typography.displayMedium,
+                                fontWeight = FontWeight.Bold
+                            )
                         }
                     }
                 }
             }
 
-            Spacer(Modifier.weight(1f))
+            Divider()
 
-            Button(
-                onClick = onGoServicios,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(50.dp)
-            ) {
-                Text("Ver servicios")
+            Text(
+                text = "Accesos Rápidos",
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold
+            )
+
+            // Flujo principal: Solicitar reparación → Técnicos → Agendar
+            MenuCard(
+                title = "Solicitar Reparación",
+                description = "Ver servicios disponibles",
+                icon = Icons.Default.Build,
+                onClick = { nav.navigate("servicios") }
+            )
+
+            MenuCard(
+                title = "Técnicos Disponibles",
+                description = "Ver y contactar técnicos",
+                icon = Icons.Default.Person,
+                onClick = { nav.navigate("tecnicos") }
+            )
+
+            MenuCard(
+                title = "Mis Reparaciones",
+                description = "Historial de servicios realizados",
+                icon = Icons.Default.List,
+                onClick = { nav.navigate("reparaciones") }
+            )
+
+            MenuCard(
+                title = "Mis Garantías",
+                description = "Ver garantías vigentes",
+                icon = Icons.Default.CheckCircle,
+                onClick = { nav.navigate("garantias") }
+            )
+
+            MenuCard(
+                title = "Mi Agenda",
+                description = "Ver eventos programados",
+                icon = Icons.Default.DateRange,
+                onClick = { nav.navigate("agenda") }
+            )
+        }
+    }
+}
+
+@Composable
+fun MenuCard(
+    title: String,
+    description: String,
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    onClick: () -> Unit
+) {
+    Card(
+        onClick = onClick,
+        modifier = Modifier.fillMaxWidth(),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                imageVector = icon,
+                contentDescription = null,
+                modifier = Modifier.size(48.dp),
+                tint = MaterialTheme.colorScheme.primary
+            )
+            Spacer(modifier = Modifier.width(16.dp))
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = title,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold
+                )
+                Text(
+                    text = description,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
             }
+            Icon(
+                Icons.Default.KeyboardArrowRight,
+                contentDescription = "Ir",
+                tint = MaterialTheme.colorScheme.onSurfaceVariant
+            )
         }
     }
 }

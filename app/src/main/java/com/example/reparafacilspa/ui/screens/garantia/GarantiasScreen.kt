@@ -1,4 +1,4 @@
-package com.example.reparafacilspa.ui.screens.agenda
+package com.example.reparafacilspa.ui.screens.garantia
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -20,7 +20,7 @@ import com.example.reparafacilspa.viewmodel.GarantiaUi
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun GarantiaScreen(
+fun GarantiasScreen(
     nav: NavController,
     viewModel: GarantiaViewModel
 ) {

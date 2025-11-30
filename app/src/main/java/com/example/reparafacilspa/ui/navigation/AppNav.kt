@@ -6,6 +6,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 
 import com.example.reparafacilspa.ui.screens.agenda.AgendaScreen
@@ -18,17 +19,29 @@ import com.example.reparafacilspa.ui.screens.login.RegisterScreen
 import com.example.reparafacilspa.ui.screens.perfil.PerfilScreen
 import com.example.reparafacilspa.ui.screens.servicio.ServicioCreateScreen
 import com.example.reparafacilspa.ui.screens.servicio.ServiciosScreen
+import com.example.reparafacilspa.ui.screens.servicio.ServicioDetailScreen
+import com.example.reparafacilspa.ui.screens.tecnico.TecnicosDisponiblesScreen
+import com.example.reparafacilspa.ui.screens.reparacion.MisReparacionesScreen
+import com.example.reparafacilspa.ui.screens.garantia.GarantiasScreen
+import com.example.reparafacilspa.ui.screens.agenda.AgendarVisitaScreen
 
 import com.example.reparafacilspa.viewmodel.AgendaViewModel
 import com.example.reparafacilspa.viewmodel.AuthSharedViewModel
 import com.example.reparafacilspa.viewmodel.ServiciosViewModel
+import com.example.reparafacilspa.viewmodel.TecnicoViewModel
+import com.example.reparafacilspa.viewmodel.ReparacionViewModel
+import com.example.reparafacilspa.viewmodel.GarantiaViewModel
 
 @Composable
-fun AppNavigation(nav: NavHostController) {
-
-    val authVm: AuthSharedViewModel = viewModel()
-    val serviciosVm: ServiciosViewModel = viewModel()
-    val agendaVm: AgendaViewModel = viewModel()
+fun AppNav(
+    authVm: AuthSharedViewModel,
+    serviciosVm: ServiciosViewModel,
+    agendaVm: AgendaViewModel,
+    tecnicoVm: TecnicoViewModel,
+    reparacionVm: ReparacionViewModel,
+    garantiaVm: GarantiaViewModel
+) {
+    val nav = rememberNavController()
 
     NavHost(
         navController = nav,
@@ -58,9 +71,8 @@ fun AppNavigation(nav: NavHostController) {
 
         composable("home") {
             HomeScreen(
-                onGoServicios = { nav.navigate("servicios") },
-                onGoPerfil = { nav.navigate("perfil") },
-                serviciosVm = serviciosVm,
+                nav = nav,
+                authVm = authVm,
                 agendaVm = agendaVm
             )
         }
@@ -80,6 +92,18 @@ fun AppNavigation(nav: NavHostController) {
             )
         }
 
+        composable(
+            route = "servicio_detail/{id}",
+            arguments = listOf(navArgument("id") { type = NavType.IntType })
+        ) { backStackEntry ->
+            val id = backStackEntry.arguments?.getInt("id") ?: 0
+            ServicioDetailScreen(
+                nav = nav,
+                vm = serviciosVm,
+                id = id
+            )
+        }
+
         composable("perfil") {
             PerfilScreen(
                 onBack = { nav.navigate("home") },
@@ -92,6 +116,45 @@ fun AppNavigation(nav: NavHostController) {
                 authVm = authVm
             )
         }
+
+        // ========== NUEVAS PANTALLAS ==========
+
+        composable("tecnicos") {
+            TecnicosDisponiblesScreen(
+                nav = nav,
+                viewModel = tecnicoVm
+            )
+        }
+
+        composable(
+            route = "agendar_visita/{tecnicoId}",
+            arguments = listOf(navArgument("tecnicoId") { type = NavType.IntType })
+        ) { backStackEntry ->
+            val tecnicoId = backStackEntry.arguments?.getInt("tecnicoId") ?: 0
+            AgendarVisitaScreen(
+                nav = nav,
+                agendaVm = agendaVm,
+                tecnicoVm = tecnicoVm,
+                reparacionVm = reparacionVm,
+                tecnicoId = tecnicoId
+            )
+        }
+
+        composable("reparaciones") {
+            MisReparacionesScreen(
+                nav = nav,
+                viewModel = reparacionVm
+            )
+        }
+
+        composable("garantias") {
+            GarantiasScreen(
+                nav = nav,
+                viewModel = garantiaVm
+            )
+        }
+
+        // ========== AGENDA ==========
 
         composable("agenda") {
             AgendaScreen(
@@ -106,6 +169,7 @@ fun AppNavigation(nav: NavHostController) {
                 vm = agendaVm
             )
         }
+
         composable(
             route = "agenda_detail/{id}",
             arguments = listOf(navArgument("id") { type = NavType.IntType })
