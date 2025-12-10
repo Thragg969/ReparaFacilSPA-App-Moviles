@@ -15,16 +15,17 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.reparafacilspa.core.auth.AuthRepository
+import com.example.reparafacilspa.core.backend.AuthBackendRepository
+import com.example.reparafacilspa.core.local.SessionManager
 import com.example.reparafacilspa.viewmodel.AuthSharedViewModel
 import kotlinx.coroutines.launch
 
@@ -42,7 +43,11 @@ fun LoginScreen(
     var loading by remember { mutableStateOf(false) }
 
     val scope = rememberCoroutineScope()
-    val repo = remember { AuthRepository() }
+    val context = LocalContext.current
+
+    // 🔥 USAR BACKEND REAL
+    val backendRepo = remember { AuthBackendRepository() }
+    val sessionManager = remember { SessionManager(context) }
 
     // Animación de entrada
     var visible by remember { mutableStateOf(false) }
@@ -236,22 +241,63 @@ fun LoginScreen(
 
                         Spacer(modifier = Modifier.height(8.dp))
 
-                        // Botón de Login
+                        // 🔥 BOTÓN DE LOGIN CON BACKEND REAL
                         Button(
                             onClick = {
                                 if (email.isBlank() || pass.isBlank()) {
                                     error = "Por favor completa todos los campos"
                                     return@Button
                                 }
+
                                 loading = true
+                                error = null
+
                                 scope.launch {
                                     try {
-                                        val token = repo.login(email.trim(), pass)
-                                        // Parámetros: (name, email)
-                                        authVm.setUser("", email.trim())
-                                        onLogin(email.trim(), pass)
+                                        // 📡 Llamada al backend real
+                                        val response = backendRepo.login(
+                                            email = email.trim(),
+                                            password = pass
+                                        )
+
+                                        // ✅ Login exitoso
+                                        if (response.success) {
+                                            val userData = response.data
+                                            val token = userData.access_token
+                                            val user = userData.user
+
+                                            // 💾 Guardar token en SessionManager
+                                            sessionManager.setToken(token)
+
+                                            // 👤 Guardar datos del usuario en ViewModel
+                                            authVm.setUser(
+                                                nombre = user.email.substringBefore("@"),
+                                                correo = user.email
+                                            )
+
+                                            // ✅ Navegar a Home
+                                            onLogin(email.trim(), pass)
+
+                                        } else {
+                                            error = response.message ?: "Error al iniciar sesión"
+                                        }
+
                                     } catch (e: Exception) {
-                                        error = e.message ?: "Error al conectar con el servidor"
+                                        // ❌ Manejo de errores mejorado
+                                        error = when {
+                                            e.message?.contains("401") == true ->
+                                                "Credenciales incorrectas"
+                                            e.message?.contains("404") == true ->
+                                                "Servidor no encontrado"
+                                            e.message?.contains("timeout") == true ->
+                                                "Tiempo de espera agotado"
+                                            e.message?.contains("Unable to resolve host") == true ->
+                                                "Sin conexión a internet"
+                                            e.message?.contains("Failed to connect") == true ->
+                                                "No se pudo conectar al servidor"
+                                            else ->
+                                                e.message ?: "Error al conectar con el servidor"
+                                        }
                                     } finally {
                                         loading = false
                                     }
